@@ -55,3 +55,13 @@ nvim
 # https://www.lunarvim.org/docs/installation
 LV_BRANCH='release-1.3/neovim-0.9' bash <(curl -s https://raw.githubusercontent.com/LunarVim/LunarVim/release-1.3/neovim-0.9/utils/installer/install.sh)
 ```
+
+
+## Trace
+
+```
+manpath: can't set the locale; make sure $LC_* and $LANG are correct
+sudo locale-gen "en_US.UTF-8"
+sudo dpkg-reconfigure locales
+ LC_ALL="en_US.UTF-8" >>> /etc/default/locale
+```
