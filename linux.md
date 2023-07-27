@@ -23,6 +23,9 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 
 p10k configure
+
+# change line with additional `%`
+unsetopt prompt_cr prompt_sp
 ```
 
 ## Language
