@@ -1,7 +1,8 @@
+# Add these to your ~/.gitconfig file under the [alias] section
 [alias]
     # Status, add, commit
-    st = status
-    s = status -s
+    s = status
+    ss = status -s
     a = add
     aa = add --all
     c = commit
@@ -43,5 +44,5 @@
     rh = reset --hard
     rb = rebase
     cp = cherry-pick
-    st = stash
-    stp = stash pop
+    st = stash  
+    stp = stash pop 
