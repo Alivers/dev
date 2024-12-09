@@ -1,0 +1,47 @@
+[alias]
+    # Status, add, commit
+    st = status
+    s = status -s
+    a = add
+    aa = add --all
+    c = commit
+    cm = commit -m
+    ca = commit --amend
+
+    # Branch operations - modern switch command
+    b = branch
+    ba = branch -a
+    bd = branch -d
+    sw = switch
+    swc = switch -c  # Create and switch to new branch
+    swm = switch main  # Quickly switch to main branch
+    swd = switch develop  # Quickly switch to develop branch
+
+    # Checkout operations
+    co = checkout  # Still needed for files and older git versions
+    cof = checkout --  # Checkout files
+    cob = checkout -b  # Legacy branch creation (can use swc instead)
+
+    # Remote operations
+    f = fetch
+    pl = pull
+    ps = push
+    pf = push --force-with-lease
+
+    # Log viewing
+    l = log --oneline
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
+    last = log -1 HEAD
+
+    # Diff & merge
+    d = diff
+    dc = diff --cached
+    m = merge
+
+    # Utility
+    rst = reset
+    rh = reset --hard
+    rb = rebase
+    cp = cherry-pick
+    st = stash
+    stp = stash pop
