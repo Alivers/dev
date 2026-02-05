@@ -4,3 +4,6 @@ DOMAIN-SUFFIX,api.aws
 DOMAIN-SUFFIX,aws.dev
 DOMAIN-SUFFIX,awsstatic.com
 DOMAIN-KEYWORD,aws
+DOMAIN-SUFFIX,x.com
+DOMAIN-SUFFIX,grok.com
+DOMAIN-KEYWORD,cloudflare
