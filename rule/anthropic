@@ -2,3 +2,4 @@ DOMAIN-SUFFIX,anthropic.com
 DOMAIN-SUFFIX,claude.ai
 DOMAIN-SUFFIX,claude.com
 DOMAIN-SUFFIX,logs.us5.datadoghq.com
+DOMAIN,browser-intake-us5-datadoghq.com
