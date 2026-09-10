@@ -4,3 +4,6 @@ DOMAIN-SUFFIX,chatgpt.com
 DOMAIN-SUFFIX,chat.com
 DOMAIN,openai.gallery.vsassets.io
 DOMAIN,openai.gallerycdn.vsassets.io
+DOMAIN,o207216.ingest.sentry.io
+DOMAIN,o33249.ingest.sentry.io
+DOMAIN,rum.browser-intake-datadoghq.com
