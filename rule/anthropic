@@ -1,8 +1,12 @@
 DOMAIN-SUFFIX,anthropic.com
 DOMAIN-SUFFIX,claude.ai
 DOMAIN-SUFFIX,claude.com
+DOMAIN,anthropic.auth0.com
+DOMAIN,anthropic-com.ghost.io
 DOMAIN-SUFFIX,claudeusercontent.com
 DOMAIN-SUFFIX,logs.us5.datadoghq.com
 DOMAIN,browser-intake-us5-datadoghq.com
+DOMAIN,servd-anthropic-website.b-cdn.net
+DOMAIN,anthropic.com.cdn.cloudflare.net
 DOMAIN,anthropic.gallery.vsassets.io
 DOMAIN,anthropic.gallerycdn.vsassets.io
