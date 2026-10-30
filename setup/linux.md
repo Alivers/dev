@@ -16,7 +16,7 @@ git config --global user.name "Alivers"
 
 ```
 sudo apt install zsh git fonts-font-awesome
-sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
 chsh
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
@@ -39,16 +39,16 @@ unsetopt prompt_cr prompt_sp
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # Node
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash
 nvm install --lts
 
 sudo apt-get install python3-pip
 ```
 
-## Vim
+## Neovim
 
 ```
-# asset was renamed from nvim.appimage in v0.10.4 (use nvim-linux-arm64.appimage on ARM)
+# use nvim-linux-arm64.appimage on ARM
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
 chmod u+x nvim-linux-x86_64.appimage
 ./nvim-linux-x86_64.appimage --appimage-extract
@@ -58,10 +58,6 @@ chmod u+x nvim-linux-x86_64.appimage
 sudo mv squashfs-root neovim
 sudo mv neovim /
 sudo ln -s /neovim/AppRun /usr/bin/nvim
-nvim
-
-# https://www.lunarvim.org/docs/installation
-LV_BRANCH='release-1.3/neovim-0.9' bash <(curl -s https://raw.githubusercontent.com/LunarVim/LunarVim/release-1.3/neovim-0.9/utils/installer/install.sh)
 ```
 
 ## Tmux
@@ -73,7 +69,6 @@ cd
 git clone https://github.com/gpakosz/.tmux.git
 ln -s -f .tmux/.tmux.conf
 cp .tmux/.tmux.conf.local .
-
 ```
 
 ## Aliases

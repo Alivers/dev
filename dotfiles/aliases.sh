@@ -1,10 +1,8 @@
 # -----------------------
 # aliases definition
 # -----------------------
-alias vim='lvim'
-alias vi='lvim'
-
-alias rm='rm'
+alias vim='nvim'
+alias vi='nvim'
 
 alias ll='ls -l'
 alias la='ll -a'

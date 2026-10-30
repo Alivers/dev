@@ -21,7 +21,6 @@
     # Checkout operations
     co = checkout  # Still needed for files and older git versions
     cof = checkout --  # Checkout files
-    cob = checkout -b  # Legacy branch creation (can use swc instead)
 
     # Remote operations
     f = fetch
