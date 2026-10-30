@@ -2,13 +2,13 @@
 
 **Date**: 2026-10-30 · **Scope**: EPUBs you import yourself. Books sold in the WeRead store go through a different, unpublished pipeline (chapter UIDs, levels, anchors) and none of this applies to them.
 
-WeRead's import path is undocumented. Everything below comes from community reverse engineering plus on-device testing. Statements marked *(EPUB spec)* are standard EPUB requirements; statements marked *(untested)* are ideas that have not been tried on a device. WeRead can change behavior in any client update, so re-test after upgrading.
+WeRead's import path is undocumented. Everything below comes from community reverse engineering plus on-device testing. Statements marked *(EPUB spec)* are standard EPUB requirements. WeRead can change behavior in any client update, so re-test after upgrading.
 
 ## Quick checklist
 
 Footnotes:
 
-- [ ] Each footnote is an `<img class="qqreader-footnote">` whose `alt` holds the full note text.
+- [ ] Each footnote is an `<img class="qqreader-footnote">` whose `alt` holds the full note text, wrapped in an EPUB3 noteref link to an `aside` with the same text.
 - [ ] The 注 icon is in the book and listed in the manifest.
 
 Table of contents:
@@ -24,30 +24,51 @@ Packaging:
 
 ## 1. Footnotes
 
-### Why standard EPUB3 footnotes don't work
+### Why WeRead needs an image footnote
 
 | | WeRead image footnote | EPUB3 standard footnote |
 | --- | --- | --- |
 | Works in | WeRead imports | Calibre, Apple Books, most other readers |
 | Markup | `<img class="qqreader-footnote" alt="…">` | `<a epub:type="noteref">` + `<aside epub:type="footnote">` |
 | Note text lives in | The `alt` attribute | An `aside` (usually in an endnotes file), with a back link |
-| In the other reader | Just an icon; no popup guaranteed | WeRead usually treats it as a plain link, no popup |
 
-WeRead's own store books use image footnotes, and the import client recognizes them by class name. So for WeRead, use the image form.
+WeRead's own store books use image footnotes, and the import client recognizes them by the class on the image. A plain EPUB3 noteref in an imported book usually behaves as an ordinary link, with no popup.
 
-### Markup
+### Markup that works in both
+
+Put the WeRead image *inside* an EPUB3 noteref link. WeRead finds the image by its class and shows the `alt` text; other readers follow the noteref to the `aside`.
 
 ```html
-<p>…the division of labour.<img class="qqreader-footnote" src="../Images/note-qqreader.png" alt="[12] Smith, Wealth of Nations, Book I, ch. 1."/></p>
+<!-- chapter file -->
+<p>…the division of labour.<a epub:type="noteref" role="doc-noteref" class="noteref-img" id="ref-12" href="notes.xhtml#note-12"><img class="qqreader-footnote" src="../Images/note-en.png" alt="[12] Smith, Wealth of Nations, Book I, ch. 1."/></a></p>
+
+<!-- notes.xhtml -->
+<aside epub:type="footnote" role="doc-footnote" id="note-12">
+  <p><a href="ch01.xhtml#ref-12" role="doc-backlink">↩</a> [12] Smith, <i>Wealth of Nations</i>, Book I, ch. 1.</p>
+</aside>
 ```
 
+Tested 2026-10-30 by converting all 287 notes in *The Almanack of Naval Ravikant*:
+
+| Reader | Tapping the icon |
+| --- | --- |
+| WeRead | Popup with the `alt` text |
+| Apple Books | Popup with the `aside`; the ↩ back link shows inside it |
+| Calibre, Kindle | Not tested |
+
+Also tested and rejected: the bare image followed by a separate superscript link (`<img …/><sup><a epub:type="noteref">12</a></sup>`). It works in WeRead, but readers see two markers, and in Apple Books tapping the bare icon opens the image viewer.
+
+For a WeRead-only book, the bare `<img class="qqreader-footnote" …/>` without the link is enough.
+
+### Rules for the image
+
 - The class must be exactly `qqreader-footnote`.
-- The popup shows the `alt` text. It does not follow links, so an endnotes chapter is never used as the popup source. Keep one at the back of the book if you want notes readable in sequence.
+- WeRead's popup shows the `alt` text and never reads the `aside`, so the note text exists twice. Generate both from one source so they can't drift apart.
 - Put the image right after the word or sentence it annotates, with no space before it.
 - `src` is relative to the XHTML file, and the image must be listed in the `content.opf` manifest *(EPUB spec)*:
 
 ```xml
-<item id="note-icon" href="Images/note-qqreader.png" media-type="image/png"/>
+<item id="note-icon" href="Images/note-en.png" media-type="image/png"/>
 ```
 
 ```css
@@ -58,7 +79,17 @@ WeRead's own store books use image footnotes, and the import client recognizes t
   vertical-align: middle;
   border: 0;
 }
+/* Books often style noterefs as small superscript, which would shrink the
+   0.9em icon with them. Reset it on the wrapping link. */
+a.noteref-img {
+  font-size: 1em;
+  vertical-align: baseline;
+  text-decoration: none;
+  border: 0;
+}
 ```
+
+If the book's own noteref class sets `font-size` with a more specific selector, match it (e.g. `a.scribe_footnote-ref.noteref-img`).
 
 ### Writing the `alt` text
 
@@ -87,9 +118,8 @@ For English books, [`note-en.png`](note-en.png) ![n note icon](note-en.png) is t
 
 ### Caveats
 
-- `qqreader-footnote` is not a public spec. Treat it as an optimization for WeRead that may stop working.
-- Other readers will show only the icon, with no popup. If the book also has to work well elsewhere, keep an endnotes chapter, or maintain a separate build for other readers.
-- *(untested)* Wrapping the image in an EPUB3 noteref link (`<a epub:type="noteref" href="notes.xhtml#n12"><img class="qqreader-footnote" …/></a>`) might serve both kinds of reader from one file. It might also make WeRead treat the icon as a link and skip the popup, so test it on a device before relying on it.
+- `qqreader-footnote` is not a public spec. Treat it as an optimization for WeRead that may stop working; the EPUB3 noteref around it keeps other readers working either way.
+- Only WeRead and Apple Books have been tested on a device.
 
 ## 2. Table of contents
 
@@ -99,7 +129,7 @@ Use an EPUB3 `nav.xhtml` (`<nav epub:type="toc">`); WeRead imports read it corre
 
 Required wiring *(EPUB spec)*: `<package version="3.0">`, the nav item in the manifest has `properties="nav"`, and if you ship an NCX the spine names its manifest id, e.g. `<spine toc="ncx">`.
 
-Match the book's real nesting depth. The earlier finding that WeRead only shows two levels is obsolete.
+Match the book's real nesting depth. The earlier finding that WeRead only shows two levels is obsolete; a three-level nav (part, chapter, section) with title-page splits displayed correctly in WeRead on 2026-10-30.
 
 ### How WeRead builds the sidebar
 
