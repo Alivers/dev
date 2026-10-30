@@ -1,3 +1,7 @@
+# New Linux machine setup
+
+Run top to bottom on a fresh Debian/Ubuntu box. Aliases live in [`../dotfiles/`](../dotfiles/).
+
 ## Github access
 
 ```
@@ -44,9 +48,10 @@ sudo apt-get install python3-pip
 ## Vim
 
 ```
-curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
-chmod u+x nvim.appimage
-./nvim.appimage --appimage-extract
+# asset was renamed from nvim.appimage in v0.10.4 (use nvim-linux-arm64.appimage on ARM)
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
+chmod u+x nvim-linux-x86_64.appimage
+./nvim-linux-x86_64.appimage --appimage-extract
 ./squashfs-root/AppRun --version
 
 # Optional: exposing nvim globally.
@@ -69,17 +74,27 @@ git clone https://github.com/gpakosz/.tmux.git
 ln -s -f .tmux/.tmux.conf
 cp .tmux/.tmux.conf.local .
 
-if [[ -f "$HOME/.tmux.alias" ]]; then
-	source $HOME/.tmux.alias
-fi
 ```
 
-
-## Trace
+## Aliases
 
 ```
-manpath: can't set the locale; make sure $LC_* and $LANG are correct
+# shell + tmux aliases
+curl -fsSL https://raw.githubusercontent.com/Alivers/dev/main/dotfiles/aliases.sh -o ~/.aliases
+cat >> ~/.zshrc << 'EOF'
+[[ -f "$HOME/.aliases" ]] && source "$HOME/.aliases"
+EOF
+
+# git aliases
+curl -fsSL https://raw.githubusercontent.com/Alivers/dev/main/dotfiles/git-aliases.gitconfig -o ~/.gitconfig-aliases
+git config --global include.path ~/.gitconfig-aliases
+```
+
+## Troubleshooting
+
+```
+# manpath: can't set the locale; make sure $LC_* and $LANG are correct
 sudo locale-gen "en_US.UTF-8"
 sudo dpkg-reconfigure locales
- LC_ALL="en_US.UTF-8" >>> /etc/default/locale
+echo 'LC_ALL="en_US.UTF-8"' | sudo tee -a /etc/default/locale
 ```

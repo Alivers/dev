@@ -38,9 +38,9 @@ alias tsh="tmux split-window -h"
 alias tmu="tmux select-pane -U"
 # 12 光标到下方窗格
 alias tmd="tmux select-pane -D"
-# 13 光标到上方窗格
+# 13 光标到左方窗格
 alias tml="tmux select-pane -L"
-# 14 光标到上方窗格
+# 14 光标到右方窗格
 alias tmr="tmux select-pane -R"
 # 15 交换窗格位置(当前窗格上移)
 alias tswapu="tmux swap-pane -U"

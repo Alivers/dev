@@ -1,4 +1,4 @@
-# Add these to your ~/.gitconfig file under the [alias] section
+# Git aliases. Install with: git config --global include.path <path to this file>
 [alias]
     # Status, add, commit
     s = status
@@ -44,5 +44,5 @@
     rh = reset --hard
     rb = rebase
     cp = cherry-pick
-    st = stash  
-    stp = stash pop 
+    st = stash
+    stp = stash pop
