@@ -13,3 +13,5 @@ Push straight to `main`; no feature branches or PRs. Before pushing, `git pull -
 - `README.md` at the root only describes what each directory is for. Don't list individual guides or put instructions in it.
 
 Remove content once it's obsolete instead of marking it as old.
+
+This repo is public. Never commit keys, certificates, passphrases or tokens (e.g. a Surge `[MITM]` CA).
