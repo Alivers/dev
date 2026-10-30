@@ -72,11 +72,12 @@ For a WeRead-only book, the bare `<img class="qqreader-footnote" …/>` without 
 ```
 
 ```css
+/* Sits slightly up and to the right of the word, like a superscript but not as small. */
 .qqreader-footnote {
-  width: 0.9em;
-  height: 0.9em;
-  margin: 0 0.08em 0 0.12em;
-  vertical-align: middle;
+  width: 0.85em;
+  height: 0.85em;
+  margin: 0 0.08em 0 0.04em;
+  vertical-align: -0.02em;
   border: 0;
 }
 /* Books often style noterefs as small superscript, which would shrink the
