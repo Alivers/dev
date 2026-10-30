@@ -3,9 +3,15 @@ DOMAIN-SUFFIX,amazonaws.com
 DOMAIN-SUFFIX,api.aws
 DOMAIN-SUFFIX,aws.dev
 DOMAIN-SUFFIX,awsstatic.com
-DOMAIN-KEYWORD,aws
+DOMAIN-SUFFIX,awsapps.com
 DOMAIN-SUFFIX,x.com
-DOMAIN-KEYWORD,cloudflare
+DOMAIN-SUFFIX,cloudflare.com
+DOMAIN-SUFFIX,cloudflare-dns.com
+DOMAIN-SUFFIX,cloudflareinsights.com
+DOMAIN-SUFFIX,cloudflarestorage.com
+DOMAIN-SUFFIX,cloudflareaccess.com
+DOMAIN-SUFFIX,workers.dev
+DOMAIN-SUFFIX,pages.dev
 DOMAIN-SUFFIX,z-library.im
 DOMAIN-SUFFIX,z-lib.sk
 DOMAIN-SUFFIX,z-library.ec
