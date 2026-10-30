@@ -1,165 +1,185 @@
-# WeRead (微信读书) EPUB Import Guide: Footnotes and Table of Contents
+# Importing EPUBs into WeRead (微信读书): Footnotes and TOC
 
-This covers EPUBs you import yourself. Books sold in the WeRead store may use other, unpublished pipelines; what follows is the general approach, reverse-engineered by the community and verified on real devices.
+**Date**: 2026-10-30 · **Scope**: EPUBs you import yourself. Books sold in the WeRead store go through a different, unpublished pipeline (chapter UIDs, levels, anchors) and none of this applies to them.
 
-## Footnotes: summary
+WeRead's import path is undocumented. Everything below comes from community reverse engineering plus on-device testing. Statements marked *(EPUB spec)* are standard EPUB requirements; statements marked *(untested)* are ideas that have not been tried on a device. WeRead can change behavior in any client update, so re-test after upgrading.
 
-- Standard **EPUB3** footnotes (`epub:type="noteref"` + `<aside epub:type="footnote">`) work reliably in Calibre and Apple Books, but **WeRead imports often don't show a popup**; the note is usually treated as a plain link.
-- WeRead's own books typically use **image footnotes**: `img.qqreader-footnote`, with the full note text in the **`alt`** attribute. Imports that follow this pattern get a popup.
+## Quick checklist
 
-## Footnotes: HTML markup
+Footnotes:
+
+- [ ] Each footnote is an `<img class="qqreader-footnote">` whose `alt` holds the full note text.
+- [ ] The 注 icon is in the book and listed in the manifest.
+
+Table of contents:
+
+- [ ] `nav.xhtml` is the TOC (optionally mirrored in `toc.ncx`), and its depth matches the book.
+- [ ] Every chapter with subsections has its own title-page file, and the nav parent points to it.
+- [ ] No two spine files share a non-empty `<title>`, and only the title page carries the chapter role.
+
+Packaging:
+
+- [ ] `mimetype` is the first zip entry, stored uncompressed, and the book passes `epubcheck`.
+- [ ] Delete the old copy in WeRead before importing the new one.
+
+## 1. Footnotes
+
+### Why standard EPUB3 footnotes don't work
+
+| | WeRead image footnote | EPUB3 standard footnote |
+| --- | --- | --- |
+| Works in | WeRead imports | Calibre, Apple Books, most other readers |
+| Markup | `<img class="qqreader-footnote" alt="…">` | `<a epub:type="noteref">` + `<aside epub:type="footnote">` |
+| Note text lives in | The `alt` attribute | An `aside` (usually in an endnotes file), with a back link |
+| In the other reader | Just an icon; no popup guaranteed | WeRead usually treats it as a plain link, no popup |
+
+WeRead's own store books use image footnotes, and the import client recognizes them by class name. So for WeRead, use the image form.
+
+### Markup
 
 ```html
-<img
-  class="qqreader-footnote"
-  src="Images/note.png"
-  alt="[number] Full citation…"
-/>
+<p>…the division of labour.<img class="qqreader-footnote" src="../Images/note-qqreader.png" alt="[12] Smith, Wealth of Nations, Book I, ch. 1."/></p>
 ```
 
-Key points:
+- The class must be exactly `qqreader-footnote`.
+- The popup shows the `alt` text. It does not follow links, so an endnotes chapter is never used as the popup source. Keep one at the back of the book if you want notes readable in sequence.
+- Put the image right after the word or sentence it annotates, with no space before it.
+- `src` is relative to the XHTML file, and the image must be listed in the `content.opf` manifest *(EPUB spec)*:
 
-1. The `class` must be `qqreader-footnote` (the client recognizes footnotes by it).
-2. The popup content is read from **`alt`**, not from a link to an endnotes chapter.
-3. `src` points to the book's "注" (note) icon; the path is relative to the XHTML file.
-4. You can keep an endnotes list at the back of the book for continuous reading, but it is not used as the popup's data source.
-
-## Footnotes: CSS example
+```xml
+<item id="note-icon" href="Images/note-qqreader.png" media-type="image/png"/>
+```
 
 ```css
 .qqreader-footnote {
   width: 0.9em;
   height: 0.9em;
-  margin-left: 0.12em;
-  margin-right: 0.08em;
+  margin: 0 0.08em 0 0.12em;
   vertical-align: middle;
-  display: inline;
   border: 0;
 }
 ```
 
-## The "注" (note) icon
+### Writing the `alt` text
+
+`alt` is a plain attribute string, which has some consequences:
+
+- No formatting: italics, links and line breaks are lost. Write citations so they read fine as plain text.
+- Escape `&`, `<` and `"` as `&amp;`, `&lt;` and `&quot;`, or the XHTML is invalid and the whole file may fail to load.
+- Screen readers read `alt` aloud inline, so very long notes make the text hard to listen to. That is the cost of this approach.
+
+### The 注 icon
 
 ![注 note icon](note-qqreader.png)
 
-`note-qqreader.png` in this directory is a ready-made 128×128 icon that follows the spec below.
+[`note-qqreader.png`](note-qqreader.png) in this directory is a ready-made 128×128 icon that matches the spec below.
 
 | Item | Spec |
 | --- | --- |
-| Shape | Perfect circle badge |
-| Fill | `#D18647` (sampled from a native WeRead screenshot; an orange-amber / tea brown) |
-| Text | White "注" |
-| Font | **Serif Song typeface** (e.g. Noto Serif CJK; do not use a sans-serif Hei typeface) |
-| Rendering | Draw at 2× and downscale for smoother edges |
-| Display | About `0.9em` in CSS, `vertical-align: middle` |
+| Shape | Filled circle, transparent background |
+| Fill | `#D18647` (orange-amber, sampled from WeRead's native icon on a light background; don't sample from night mode, which is grey) |
+| Glyph | White 注 in a **serif (Song/Ming) face** such as Noto Serif CJK, not a sans-serif Hei face |
+| Rendering | Draw at 2× and downscale for smooth edges |
 
-Note: don't sample the color from a night-mode screenshot with a grey background. **Use the native orange-amber shown on a light background.**
+To regenerate it, draw the circle and glyph with Pillow and a serif CJK font, then replace the image file in the book and repackage. The HTML does not change.
 
-## Differences from standard EPUB3 footnotes
+### Caveats
 
-| | WeRead image footnote | EPUB3 standard footnote |
-| --- | --- | --- |
-| Target | WeRead import popup | Calibre, Apple Books, etc. |
-| Markup | `img.qqreader-footnote` + `alt` | Superscript + `noteref` |
-| Where the note lives | In `alt` | `aside` in an endnotes chapter, with a back link |
-| Interoperability | Popup not guaranteed in other readers | Popup not guaranteed in WeRead imports |
+- `qqreader-footnote` is not a public spec. Treat it as an optimization for WeRead that may stop working.
+- Other readers will show only the icon, with no popup. If the book also has to work well elsewhere, keep an endnotes chapter, or maintain a separate build for other readers.
+- *(untested)* Wrapping the image in an EPUB3 noteref link (`<a epub:type="noteref" href="notes.xhtml#n12"><img class="qqreader-footnote" …/></a>`) might serve both kinds of reader from one file. It might also make WeRead treat the icon as a link and skip the popup, so test it on a device before relying on it.
 
-## Regenerating the icon (memo)
+## 2. Table of contents
 
-With Pillow and a serif CJK font: fill a circle with `#D18647`, center a white "注", transparent background. Replace the note icon resource inside the book and repackage; no HTML changes are needed.
+### Format
 
-## Footnote risk
+Use an EPUB3 `nav.xhtml` (`<nav epub:type="toc">`); WeRead imports read it correctly. For older readers that only understand NCX, you can also ship a `toc.ncx` with the same structure, and you have to keep the two in sync by hand.
 
-`qqreader-footnote` is not a public spec and WeRead may stop supporting it. Treat it only as an optimization for imported books, not as an official API.
+Required wiring *(EPUB spec)*: `<package version="3.0">`, the nav item in the manifest has `properties="nav"`, and if you ship an NCX the spine names its manifest id, e.g. `<spine toc="ncx">`.
 
-## Table of contents: which standard
+Match the book's real nesting depth. The earlier finding that WeRead only shows two levels is obsolete.
 
-- **Use an EPUB3 `nav.xhtml`** (`epub:type="toc"`). It works in WeRead imports in real-device testing.
-- You can also write a **`toc.ncx`** with the same structure, for older readers that only understand NCX. Keep the two in sync.
-- The package can be marked `version="3.0"`, with `properties="nav"` on the nav item in the manifest.
-- The sidebar is **driven mainly by nav/ncx**, but WeRead also picks up **the HTML `<title>` of each XHTML file in the spine** (see "Duplicate entries `_1` / `_2`" below). It does not rely on nav alone and ignore file titles.
-- Books sold in the store use a different interface (chapter UID / level / anchors) that has nothing to do with imported EPUBs.
-- Public sources show **no** TOC-specific class equivalent to the footnote class.
+### How WeRead builds the sidebar
 
-## Table of contents: nesting depth
+Two inputs matter, and most TOC bugs come from forgetting the second:
 
-- **Match the original book**: use as many levels as the book has. There is no need to flatten to two or three levels (the earlier finding that "only two levels work" is obsolete).
-- One caveat remains: when a parent and its first child are in the same file with adjacent anchors, the first section can be swallowed (see "split out a title page" below).
+1. **The nav (or NCX) tree** sets the structure.
+2. **The HTML `<title>` of every spine file** is scanned too. A file with a non-empty `<title>` that isn't in the nav can still show up as an entry, and two files with the same `<title>` get suffixed `_1`, `_2` to tell them apart.
 
-## Table of contents: first section in the same file gets swallowed
+There is no TOC-specific class like the footnote one.
 
-Symptom: when a chapter is expanded, the sidebar is **missing the first section right after the chapter heading**, even though the text is still there.
+### Problem: the first subsection disappears
 
-Likely cause: when the parent and its first child point to **the same XHTML file** with adjacent anchors, the sidebar folds the child away.
+**Symptom**: when you expand a chapter in the sidebar, its first subsection is missing, even though the text is in the book.
 
-## Table of contents: the fix (split out a title page)
+**Likely cause**: the chapter and its first subsection point into the same XHTML file at adjacent anchors, and the sidebar folds the child into the parent.
 
-For every chapter that has sections under it:
+**Fix: give each chapter its own title page.** For every chapter that has subsections:
 
-1. Create a new title-page XHTML containing only the chapter heading (and any chapter intro).
-2. Keep the original file's text starting from **the first section**.
-3. Add the title page to the manifest in `content.opf`; in the **spine, place the title page immediately before the original file**.
-4. In **`nav.xhtml` (and `toc.ncx`, if you keep one)**: point the parent at the **title page**; children still point to the section anchors in the original file. Keep both TOCs consistent.
-5. If the book also has an HTML contents page, update that chapter's link to point to the title page too.
-
-### `nav.xhtml` snippet
+1. Create a title-page XHTML holding only the chapter heading (and any chapter intro). Give it the chapter's `<title>`, the chapter `id`, and the chapter role (`epub:type="chapter"` / `role="doc-chapter"`).
+2. Trim the original file so it starts at the first subsection. Remove the chapter `id` and chapter role from its wrapper, and give it an **empty `<title>`** or one that is distinct from the chapter title. Otherwise you trade this bug for the duplicate-entry bug below.
+3. In `content.opf`, add the title page to the manifest and put it in the spine **immediately before** the original file.
+4. In `nav.xhtml` (and `toc.ncx`), point the chapter at the title page; the subsections keep pointing at their anchors in the original file.
+5. If the book has an HTML contents page, point that chapter's link at the title page too.
 
 ```html
 <nav epub:type="toc" id="toc">
   <ol>
     <li>
-      <a href="chapter-title-page.xhtml#chapter-anchor">Chapter title</a>
+      <a href="ch05-title.xhtml">V: Of Bounties</a>
       <ol>
-        <li><a href="original-file.xhtml#section-anchor">First section</a></li>
-        <!-- remaining sections… -->
+        <li><a href="ch05.xhtml#s1">First subsection</a></li>
+        <!-- remaining subsections… -->
       </ol>
     </li>
   </ol>
 </nav>
 ```
 
-### NCX snippet (optional, for dual TOCs)
+The NCX equivalent, if you ship one:
 
 ```xml
-<navPoint playOrder="…">
-  <navLabel><text>Chapter title</text></navLabel>
-  <content src="chapter-title-page.xhtml#chapter-anchor"/>
-  <navPoint playOrder="…">
-    <navLabel><text>First section</text></navLabel>
-    <content src="original-file.xhtml#section-anchor"/>
+<navPoint id="ch05" playOrder="…">
+  <navLabel><text>V: Of Bounties</text></navLabel>
+  <content src="ch05-title.xhtml"/>
+  <navPoint id="ch05-s1" playOrder="…">
+    <navLabel><text>First subsection</text></navLabel>
+    <content src="ch05.xhtml#s1"/>
   </navPoint>
-  <!-- remaining sections… -->
 </navPoint>
 ```
 
-## Table of contents: duplicate entries `_1` / `_2` / `(continued)` (seen on device)
+### Problem: duplicate entries (`_1`, `_2`, `(continued)`)
 
-Importing *The Wealth of Nations* produced sidebar entries such as `VII: Of Colonies_1`, `Editor’s Introduction_1`, `Endnotes 1–500_1`, or `… (continued)`.
+**Symptom** (seen importing *The Wealth of Nations*): sidebar entries like `VII: Of Colonies_1`, `Editor’s Introduction_1`, `Endnotes 1–500_1`, or `… (continued)`.
 
-### Causes
+**Causes**, all versions of "two spine files look like the same chapter":
 
-1. **Colliding `<title>`s**: two XHTML files in the spine have the same HTML `<title>` (e.g. both the title page and the body say `V: Of Bounties`), so WeRead appends `_1`, `_2` to tell them apart.
-2. **Title page and body both marked as chapters**: after splitting out a title page, if the body wrapper still carries the same `id` and `role="doc-chapter"` / `epub:type="chapter"`, it is treated as a second chapter with the same name.
-3. **Splitting files to avoid very long chapters**: after splitting one chapter into several XHTML files, if the continuation files' `<title>` is "original title" or "original title (continued)", WeRead pulls them into the TOC too. Leaving the continuation `<title>` empty helps, but WeRead may still split a very long single file on its own and label the parts `_1`.
+1. Two files share a `<title>`. The usual way this happens is a title-page split where both files kept the chapter title (see step 2 above).
+2. After a split, the body file still carries the chapter `id` and chapter role, so it is treated as a second chapter.
+3. A long chapter was split into continuation files whose `<title>` repeats the chapter title or adds `(continued)`, so WeRead lists them as entries.
 
-### Practical options
+The first two are fixed by doing the title-page split as described above. For continuation files, pick one:
 
-| Approach | TOC result | Cost |
+| Approach | Sidebar result | Cost |
 | --- | --- | --- |
-| **Merge back into one file** (try this first) | Fewer `_1`/`_2`/`(continued)` entries caused by split files | Very long chapters may still be split automatically by WeRead |
-| Split files, leave continuation `<title>` empty, and keep them out of nav | Sidebar shows only the single nav entry | WeRead may still name untitled files; check on a real device |
-| Split files and give each part a **distinct** title in nav | You can jump into the middle of a chapter | Longer TOC; readers have to accept the new names |
+| **Merge continuations back into one file** (try first) | No extra entries from splitting | WeRead may still auto-split a very long file and label the parts `_1` |
+| Keep the split; give continuation files an empty `<title>` and leave them out of the nav | Only the nav entry shows | WeRead may still name untitled files; check on a device |
+| Keep the split and give each part its own distinct nav entry | Readers can jump to mid-chapter | Longer TOC with invented part names |
 
-Real sections (e.g. I / II / III under Colonies) should each go into nav with **distinct titles**. That is the book's actual structure, not continuation files.
+This is only about continuation files. Real subsections (e.g. I, II, III under *Of Colonies*) belong in the nav, each with its own title. If two genuinely different chapters share a name (two `Introduction`s), rename one, e.g. `Book II Introduction`.
 
-### Checklist
+## 3. Packaging and re-importing
 
-- Keep non-empty `<title>`s in the spine unique where possible (if two chapters are both called `Introduction`, rename one to e.g. `Book II Introduction`).
-- Only the title page carries the chapter id / `doc-chapter`; the body wrapper must not repeat the same id and chapter role.
-- If continuation files must be split out: leave their `<title>` empty and don't write `(continued)`.
-- After making changes, **delete the old book in WeRead before re-importing**.
+The `mimetype` file must be the first entry in the zip, stored uncompressed, and contain exactly `application/epub+zip` with no trailing newline *(EPUB spec)*. From the unpacked book's root:
 
-## Packaging notes
+```sh
+rm -f ../book.epub
+zip -X0 ../book.epub mimetype
+zip -Xr9D ../book.epub META-INF OEBPS   # adjust to your content folder name
+epubcheck ../book.epub
+```
 
-- `mimetype` must be the **first** entry in the zip and stored uncompressed.
-- After changing the TOC or footnotes, **delete the old book in WeRead before re-importing** to avoid a cached old TOC or old resources.
+`epubcheck` catches broken `alt` escaping, missing manifest items and nav wiring errors before WeRead does, and WeRead's own failure modes are much harder to diagnose.
+
+WeRead caches the TOC and resources of an imported book. After any change, **delete the old copy in WeRead first, then import**, or you may be testing the old version.
