@@ -83,6 +83,8 @@ WeRead's own store books use image footnotes, and the import client recognizes t
 
 To regenerate it, draw the circle and glyph with Pillow and a serif CJK font, then replace the image file in the book and repackage. The HTML does not change.
 
+For English books, [`note-en.png`](note-en.png) ![n note icon](note-en.png) is the same badge with a white lowercase "n" (for *note*) in Liberation Serif Regular, a metric-compatible stand-in for Times New Roman, drawn at 2× (256 px) and downscaled to 128 px.
+
 ### Caveats
 
 - `qqreader-footnote` is not a public spec. Treat it as an optimization for WeRead that may stop working.
