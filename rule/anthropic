@@ -5,8 +5,10 @@ DOMAIN,anthropic.auth0.com
 DOMAIN,anthropic-com.ghost.io
 DOMAIN-SUFFIX,claudeusercontent.com
 DOMAIN-SUFFIX,logs.us5.datadoghq.com
+DOMAIN-SUFFIX,o1158394.ingest.us.sentry.io
 DOMAIN,browser-intake-us5-datadoghq.com
 DOMAIN,servd-anthropic-website.b-cdn.net
 DOMAIN,anthropic.com.cdn.cloudflare.net
 DOMAIN,anthropic.gallery.vsassets.io
 DOMAIN,anthropic.gallerycdn.vsassets.io
+DOMAIN-SUFFIX,api3.siftscience.com
