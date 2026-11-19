@@ -1,3 +1,4 @@
+PROCESS-NAME,/Applications/ChatGPT.app/
 DOMAIN,chat.openai.com.cdn.cloudflare.net
 DOMAIN-SUFFIX,openai.com
 DOMAIN-SUFFIX,chatgpt.com
